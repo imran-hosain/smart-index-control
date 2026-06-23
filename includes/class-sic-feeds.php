@@ -21,9 +21,26 @@ class SIC_Feeds {
 
 	/**
 	 * Sends a 410 Gone response for feed requests when the
-	 * "disable feeds" setting is on. Full logic added on Day 4.
+	 * "disable feeds" setting is on, then stops WordPress from
+	 * rendering the feed template at all.
+	 *
+	 * 410 (rather than 404) tells search engines the resource was
+	 * intentionally and permanently removed, so it gets dropped
+	 * from the index faster than a generic "not found".
 	 */
 	public function maybe_disable_feed() {
-		// Logic implemented on Day 4.
+
+		if ( ! SIC_Settings::get( 'disable_feeds' ) ) {
+			return;
+		}
+
+		nocache_headers();
+		status_header( 410 );
+
+		wp_die(
+			esc_html__( 'Feeds are disabled on this site.', 'smart-index-control' ),
+			esc_html__( 'Feed Disabled', 'smart-index-control' ),
+			array( 'response' => 410 )
+		);
 	}
 }
