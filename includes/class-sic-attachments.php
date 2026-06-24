@@ -18,8 +18,8 @@ class SIC_Attachments {
 	/**
 	 * Redirects a standalone attachment page to its parent post
 	 * (301, permanent) when the setting is enabled. If the
-	 * attachment has no parent, it falls back to the site homepage
-	 * rather than leaving the thin attachment page accessible.
+	 * attachment has no parent, it falls back to the custom URL set
+	 * on the Advanced tab, or the homepage if none was set.
 	 */
 	public function maybe_redirect_attachment() {
 
@@ -38,9 +38,8 @@ class SIC_Attachments {
 		if ( $parent_id ) {
 			$redirect_url = get_permalink( $parent_id );
 		} else {
-			// No parent post — send to home rather than leave a
-			// dangling attachment-only page live.
-			$redirect_url = home_url( '/' );
+			$custom_fallback = SIC_Settings::get( 'redirect_fallback_url', '' );
+			$redirect_url     = $custom_fallback ? $custom_fallback : home_url( '/' );
 		}
 
 		if ( ! $redirect_url ) {
