@@ -68,32 +68,40 @@ class SIC_Settings {
 	 */
 	private function get_tab_script() {
 	return "
-		document.addEventListener('DOMContentLoaded', function () {
-			var tabs = document.querySelectorAll('.sic-tabs a');
-			var panels = document.querySelectorAll('.sic-tab-panel');
+	document.addEventListener('DOMContentLoaded', function () {
+		var tabs = document.querySelectorAll('.sic-tabs a');
+		var panels = document.querySelectorAll('.sic-tab-panel');
 
-			tabs.forEach(function (tab) {
-				tab.addEventListener('click', function (e) {
-					e.preventDefault();
-					var target = tab.getAttribute('data-tab');
+		tabs.forEach(function (tab) {
+			tab.addEventListener('click', function (e) {
+				e.preventDefault();
+				var target = tab.getAttribute('data-tab');
 
-					tabs.forEach(function (t) { t.classList.remove('is-active'); });
-					tab.classList.add('is-active');
+				tabs.forEach(function (t) { t.classList.remove('is-active'); });
+				tab.classList.add('is-active');
 
-					panels.forEach(function (p) {
-						p.classList.toggle('is-active', p.getAttribute('data-tab') === target);
-					});
+				panels.forEach(function (p) {
+					p.classList.toggle('is-active', p.getAttribute('data-tab') === target);
+				});
 
-					if (history.replaceState) {
-						var url = new URL(window.location.href);
-						url.searchParams.set('tab', target);
-						history.replaceState(null, '', url);
-					}
+				var url = new URL(window.location.href);
+				url.searchParams.set('tab', target);
+
+				if (history.replaceState) {
+					history.replaceState(null, '', url);
+				}
+
+				// Keep every form's hidden referer field in sync,
+				// so saving from any tab redirects back to that
+				// same tab instead of always landing on the default.
+				document.querySelectorAll('input[name=\"_wp_http_referer\"]').forEach(function (input) {
+					input.value = url.pathname + url.search;
 				});
 			});
 		});
-	  ";
-	}
+	});
+	";
+}
 
 	/**
 	 * Registers the option.
@@ -321,6 +329,44 @@ class SIC_Settings {
 	}
 
 	/**
+ * Outputs hidden inputs preserving every setting that does NOT
+ * belong to the given tab, so submitting one tab's form never
+ * wipes out the others. Without this, register_setting's
+ * sanitize callback would treat any missing key as "off".
+ *
+ * @param string $current_tab Tab being rendered/submitted.
+ * @param array  $settings    Current saved settings.
+ */
+private function render_hidden_fields_for_other_tabs( $current_tab, $settings ) {
+	$fields = $this->get_field_definitions();
+
+	foreach ( $fields as $key => $field ) {
+		if ( $field['tab'] === $current_tab ) {
+			continue;
+		}
+		?>
+		<input
+			type="hidden"
+			name="<?php echo esc_attr( self::OPTION_KEY ); ?>[<?php echo esc_attr( $key ); ?>]"
+			value="<?php echo ! empty( $settings[ $key ] ) ? '1' : '0'; ?>"
+		/>
+		<?php
+	}
+
+	// The Advanced tab's URL field isn't in get_field_definitions(),
+	// so it needs the same treatment whenever we're NOT on Advanced.
+	if ( 'advanced' !== $current_tab ) {
+		?>
+		<input
+			type="hidden"
+			name="<?php echo esc_attr( self::OPTION_KEY ); ?>[redirect_fallback_url]"
+			value="<?php echo esc_attr( isset( $settings['redirect_fallback_url'] ) ? $settings['redirect_fallback_url'] : '' ); ?>"
+		/>
+		<?php
+	  }
+	}
+
+	/**
 	 * Renders the Advanced tab's settings field (the part that
 	 * belongs inside the options.php form): the custom redirect
 	 * fallback URL.
@@ -468,6 +514,7 @@ class SIC_Settings {
 				<div class="sic-tab-panel<?php echo 'archives' === $active_tab ? ' is-active' : ''; ?>" data-tab="archives">
 					<form action="options.php" method="post">
 						<?php settings_fields( 'sic_settings_group' ); ?>
+						<?php $this->render_hidden_fields_for_other_tabs( 'archives', $settings ); ?>
 						<p class="sic-panel-intro">
 							<?php esc_html_e( 'Enable only what you need. Nothing here is turned on by default.', 'smart-index-control' ); ?>
 						</p>
@@ -479,6 +526,7 @@ class SIC_Settings {
 				<div class="sic-tab-panel<?php echo 'feeds' === $active_tab ? ' is-active' : ''; ?>" data-tab="feeds">
 					<form action="options.php" method="post">
 						<?php settings_fields( 'sic_settings_group' ); ?>
+						<?php $this->render_hidden_fields_for_other_tabs( 'feeds', $settings ); ?>
 						<p class="sic-panel-intro">
 							<?php esc_html_e( 'Enable only what you need. Nothing here is turned on by default.', 'smart-index-control' ); ?>
 						</p>
@@ -490,6 +538,7 @@ class SIC_Settings {
 				<div class="sic-tab-panel<?php echo 'attachments' === $active_tab ? ' is-active' : ''; ?>" data-tab="attachments">
 					<form action="options.php" method="post">
 						<?php settings_fields( 'sic_settings_group' ); ?>
+						<?php $this->render_hidden_fields_for_other_tabs( 'attachments', $settings ); ?>
 						<p class="sic-panel-intro">
 							<?php esc_html_e( 'Enable only what you need. Nothing here is turned on by default.', 'smart-index-control' ); ?>
 						</p>
@@ -501,6 +550,7 @@ class SIC_Settings {
 				<div class="sic-tab-panel<?php echo 'advanced' === $active_tab ? ' is-active' : ''; ?>" data-tab="advanced">
 					<form action="options.php" method="post">
 						<?php settings_fields( 'sic_settings_group' ); ?>
+						<?php $this->render_hidden_fields_for_other_tabs( 'advanced', $settings ); ?>
 						<?php $this->render_advanced_settings_field( $settings ); ?>
 					</form>
 					<?php $this->render_advanced_io_section(); ?>
