@@ -66,7 +66,44 @@ class SIC_Settings {
 	 *
 	 * @return string
 	 */
-	private function get_tab_script() {
+// 	private function get_tab_script() {
+// 	return "
+// 	document.addEventListener('DOMContentLoaded', function () {
+// 		var tabs = document.querySelectorAll('.sic-tabs a');
+// 		var panels = document.querySelectorAll('.sic-tab-panel');
+
+// 		tabs.forEach(function (tab) {
+// 			tab.addEventListener('click', function (e) {
+// 				e.preventDefault();
+// 				var target = tab.getAttribute('data-tab');
+
+// 				tabs.forEach(function (t) { t.classList.remove('is-active'); });
+// 				tab.classList.add('is-active');
+
+// 				panels.forEach(function (p) {
+// 					p.classList.toggle('is-active', p.getAttribute('data-tab') === target);
+// 				});
+
+// 				var url = new URL(window.location.href);
+// 				url.searchParams.set('tab', target);
+
+// 				if (history.replaceState) {
+// 					history.replaceState(null, '', url);
+// 				}
+
+// 				// Keep every form's hidden referer field in sync,
+// 				// so saving from any tab redirects back to that
+// 				// same tab instead of always landing on the default.
+// 				document.querySelectorAll('input[name=\"_wp_http_referer\"]').forEach(function (input) {
+// 					input.value = url.pathname + url.search;
+// 				});
+// 			});
+// 		});
+// 	});
+// 	";
+// }
+
+private function get_tab_script() {
 	return "
 	document.addEventListener('DOMContentLoaded', function () {
 		var tabs = document.querySelectorAll('.sic-tabs a');
@@ -86,16 +123,22 @@ class SIC_Settings {
 
 				var url = new URL(window.location.href);
 				url.searchParams.set('tab', target);
+				url.searchParams.delete('sic_import');
 
 				if (history.replaceState) {
 					history.replaceState(null, '', url);
 				}
 
-				// Keep every form's hidden referer field in sync,
-				// so saving from any tab redirects back to that
-				// same tab instead of always landing on the default.
 				document.querySelectorAll('input[name=\"_wp_http_referer\"]').forEach(function (input) {
 					input.value = url.pathname + url.search;
+				});
+
+				// The import success/error notice is only relevant
+				// right after the import redirect — once the user
+				// navigates to another tab, hide it so it doesn't
+				// look like a stale leftover message.
+				document.querySelectorAll('.sic-io-notice').forEach(function (notice) {
+					notice.style.display = 'none';
 				});
 			});
 		});
