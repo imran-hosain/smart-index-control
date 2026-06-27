@@ -8,10 +8,9 @@
  * Requires PHP:      7.4
  * Author:            Imran Hosain
  * Author URI:        https://imranhosain.com
- * License:            GPL v2 or later
- * License URI:        https://www.gnu.org/licenses/gpl-2.0.html
+ * License:           GPL v2 or later
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       smart-index-control
- * Domain Path:       /languages
  */
 
 // Block direct access.
@@ -24,14 +23,6 @@ define( 'SIC_PLUGIN_FILE', __FILE__ );
 define( 'SIC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SIC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'SIC_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
-
-/**
- * Load plugin text domain for translations.
- */
-function sic_load_textdomain() {
-	load_plugin_textdomain( 'smart-index-control', false, dirname( SIC_PLUGIN_BASENAME ) . '/languages' );
-}
-add_action( 'plugins_loaded', 'sic_load_textdomain' );
 
 /**
  * Include required files.

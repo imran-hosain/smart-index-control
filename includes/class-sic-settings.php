@@ -320,7 +320,8 @@ private function get_tab_script() {
 		}
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents
-		$contents = file_get_contents( $_FILES['sic_import_file']['tmp_name'] );
+		$tmp_name = isset( $_FILES['sic_import_file']['tmp_name'] ) ? sanitize_text_field( wp_unslash( $_FILES['sic_import_file']['tmp_name'] ) ) : '';
+		$contents = $tmp_name ? file_get_contents( $tmp_name ) : false;
 		$decoded  = json_decode( (string) $contents, true );
 
 		if ( ! is_array( $decoded ) ) {
@@ -478,8 +479,13 @@ private function render_hidden_fields_for_other_tabs( $current_tab, $settings ) 
 				</form>
 			</div>
 
-			<?php if ( isset( $_GET['sic_import'] ) ) : ?>
-				<?php if ( 'success' === $_GET['sic_import'] ) : ?>
+			<?php
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display flag from redirect, no state change.
+			$import_status = isset( $_GET['sic_import'] ) ? sanitize_key( wp_unslash( $_GET['sic_import'] ) ) : '';
+			?>
+
+			<?php if ( $import_status ) : ?>
+				<?php if ( 'success' === $import_status ) : ?>
 					<p class="sic-io-notice is-success"><?php esc_html_e( 'Settings imported successfully.', 'smart-index-control' ); ?></p>
 				<?php else : ?>
 					<p class="sic-io-notice is-error"><?php esc_html_e( 'Import failed. Please upload a valid settings JSON file exported from this plugin.', 'smart-index-control' ); ?></p>
@@ -498,6 +504,7 @@ private function render_hidden_fields_for_other_tabs( $current_tab, $settings ) 
 		}
 
 		$tabs       = $this->get_tabs();
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only tab navigation, no state change.
 		$active_tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'archives';
 
 		if ( ! isset( $tabs[ $active_tab ] ) ) {
