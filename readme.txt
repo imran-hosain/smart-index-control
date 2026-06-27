@@ -52,7 +52,8 @@ No. It only outputs a meta tag conditionally and handles redirects/feed response
 
 1. Archives tab — noindex controls for tag and category archives.
 2. Feeds tab — disable RSS/Atom feeds with a single toggle.
-3. Advanced tab — custom redirect fallback URL and settings export/import.
+3. Attachments tab — redirect standalone attachment pages to their parent post.
+4. Advanced tab — custom redirect fallback URL and settings export/import.
 
 == Changelog ==
 
