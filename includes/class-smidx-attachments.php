@@ -9,10 +9,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class SIC_Attachments {
+class SMIDX_Attachments {
 
 	public function __construct() {
-		add_action( 'template_redirect', array( $this, 'maybe_redirect_attachment' ) );
+		add_action( 'template_redirect', array( $this, 'maybe_redirect_attachment' ), 1 );
 	}
 
 	/**
@@ -23,7 +23,7 @@ class SIC_Attachments {
 	 */
 	public function maybe_redirect_attachment() {
 
-		if ( ! is_attachment() || ! SIC_Settings::get( 'redirect_attachments' ) ) {
+		if ( ! is_attachment() || ! SMIDX_Settings::get( 'redirect_attachments' ) ) {
 			return;
 		}
 
@@ -38,7 +38,7 @@ class SIC_Attachments {
 		if ( $parent_id ) {
 			$redirect_url = get_permalink( $parent_id );
 		} else {
-			$custom_fallback = SIC_Settings::get( 'redirect_fallback_url', '' );
+			$custom_fallback = SMIDX_Settings::get( 'redirect_fallback_url', '' );
 			$redirect_url     = $custom_fallback ? $custom_fallback : home_url( '/' );
 		}
 

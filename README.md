@@ -43,7 +43,7 @@ Most SEO plugins bundle dozens of unrelated features. Smart Index Control focuse
 
 ## Development notes
 
-- Settings are stored as a single option (`sic_settings`) and cleaned up on uninstall, not on deactivation, so temporarily disabling the plugin never wipes your configuration.
+- Settings are stored as a single option (`smidx_settings`) and cleaned up on uninstall, not on deactivation, so temporarily disabling the plugin never wipes your configuration.
 - The sanitize callback re-validates every known key on every save; hidden fields preserve cross-tab values so saving one tab never resets another.
 - Admin CSS/JS is enqueued only on the plugin's own settings page — it never loads elsewhere in wp-admin.
 - Follows WordPress Coding Standards throughout.

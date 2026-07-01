@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class SIC_Feeds {
+class SMIDX_Feeds {
 
 	public function __construct() {
 		add_action( 'do_feed', array( $this, 'maybe_disable_feed' ), 1 );
@@ -30,7 +30,7 @@ class SIC_Feeds {
 	 */
 	public function maybe_disable_feed() {
 
-		if ( ! SIC_Settings::get( 'disable_feeds' ) ) {
+		if ( ! SMIDX_Settings::get( 'disable_feeds' ) ) {
 			return;
 		}
 

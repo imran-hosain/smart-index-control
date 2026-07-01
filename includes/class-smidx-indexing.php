@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class SIC_Indexing {
+class SMIDX_Indexing {
 
 	public function __construct() {
 		add_action( 'wp_head', array( $this, 'maybe_output_noindex' ), 1 );
@@ -30,11 +30,11 @@ class SIC_Indexing {
 
 		$should_noindex = false;
 
-		if ( is_tag() && SIC_Settings::get( 'noindex_tag_archives' ) ) {
+		if ( is_tag() && SMIDX_Settings::get( 'noindex_tag_archives' ) ) {
 			$should_noindex = true;
 		}
 
-		if ( is_category() && SIC_Settings::get( 'noindex_category_archives' ) ) {
+		if ( is_category() && SMIDX_Settings::get( 'noindex_category_archives' ) ) {
 			$should_noindex = true;
 		}
 
@@ -45,7 +45,7 @@ class SIC_Indexing {
 		 *
 		 * @param bool $should_noindex Whether to output the noindex tag.
 		 */
-		$should_noindex = apply_filters( 'sic_should_noindex', $should_noindex );
+		$should_noindex = apply_filters( 'smidx_should_noindex', $should_noindex );
 
 		if ( $should_noindex ) {
 			echo '<meta name="robots" content="noindex, follow" />' . "\n";

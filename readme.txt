@@ -1,5 +1,5 @@
 === Smart Index Control ===
-Contributors: imranhosain
+Contributors: coderimran
 Tags: seo, noindex, feed, attachment, indexing
 Requires at least: 6.0
 Tested up to: 7.0

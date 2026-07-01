@@ -11,17 +11,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class SIC_Settings {
+class SMIDX_Settings {
 
-	const OPTION_KEY = 'sic_settings';
+	const OPTION_KEY = 'smidx_settings';
 	const PAGE_SLUG  = 'smart-index-control';
 
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
-		add_action( 'admin_post_sic_export_settings', array( $this, 'handle_export' ) );
-		add_action( 'admin_post_sic_import_settings', array( $this, 'handle_import' ) );
+		add_action( 'admin_post_smidx_export_settings', array( $this, 'handle_export' ) );
+		add_action( 'admin_post_smidx_import_settings', array( $this, 'handle_import' ) );
 	}
 
 	/**
@@ -50,10 +50,10 @@ class SIC_Settings {
 		}
 
 		wp_enqueue_style(
-			'sic-admin',
-			SIC_PLUGIN_URL . 'assets/admin.css',
+			'smidx-admin',
+			SMIDX_PLUGIN_URL . 'assets/admin.css',
 			array(),
-			SIC_VERSION
+			SMIDX_VERSION
 		);
 
 		wp_enqueue_script( 'jquery' );
@@ -69,8 +69,8 @@ class SIC_Settings {
 // 	private function get_tab_script() {
 // 	return "
 // 	document.addEventListener('DOMContentLoaded', function () {
-// 		var tabs = document.querySelectorAll('.sic-tabs a');
-// 		var panels = document.querySelectorAll('.sic-tab-panel');
+// 		var tabs = document.querySelectorAll('.smidx-tabs a');
+// 		var panels = document.querySelectorAll('.smidx-tab-panel');
 
 // 		tabs.forEach(function (tab) {
 // 			tab.addEventListener('click', function (e) {
@@ -106,8 +106,8 @@ class SIC_Settings {
 private function get_tab_script() {
 	return "
 	document.addEventListener('DOMContentLoaded', function () {
-		var tabs = document.querySelectorAll('.sic-tabs a');
-		var panels = document.querySelectorAll('.sic-tab-panel');
+		var tabs = document.querySelectorAll('.smidx-tabs a');
+		var panels = document.querySelectorAll('.smidx-tab-panel');
 
 		tabs.forEach(function (tab) {
 			tab.addEventListener('click', function (e) {
@@ -123,7 +123,7 @@ private function get_tab_script() {
 
 				var url = new URL(window.location.href);
 				url.searchParams.set('tab', target);
-				url.searchParams.delete('sic_import');
+				url.searchParams.delete('smidx_import');
 
 				if (history.replaceState) {
 					history.replaceState(null, '', url);
@@ -137,7 +137,7 @@ private function get_tab_script() {
 				// right after the import redirect — once the user
 				// navigates to another tab, hide it so it doesn't
 				// look like a stale leftover message.
-				document.querySelectorAll('.sic-io-notice').forEach(function (notice) {
+				document.querySelectorAll('.smidx-io-notice').forEach(function (notice) {
 					notice.style.display = 'none';
 				});
 			});
@@ -151,7 +151,7 @@ private function get_tab_script() {
 	 */
 	public function register_settings() {
 		register_setting(
-			'sic_settings_group',
+			'smidx_settings_group',
 			self::OPTION_KEY,
 			array(
 				'sanitize_callback' => array( $this, 'sanitize_settings' ),
@@ -285,7 +285,7 @@ private function get_tab_script() {
 			wp_die( esc_html__( 'You do not have permission to do this.', 'smart-index-control' ) );
 		}
 
-		check_admin_referer( 'sic_export_settings' );
+		check_admin_referer( 'smidx_export_settings' );
 
 		$settings = get_option( self::OPTION_KEY, $this->get_defaults() );
 
@@ -307,25 +307,25 @@ private function get_tab_script() {
 			wp_die( esc_html__( 'You do not have permission to do this.', 'smart-index-control' ) );
 		}
 
-		check_admin_referer( 'sic_import_settings' );
+		check_admin_referer( 'smidx_import_settings' );
 
 		$redirect_url = add_query_arg(
 			array( 'page' => self::PAGE_SLUG, 'tab' => 'advanced' ),
 			admin_url( 'admin.php' )
 		);
 
-		if ( empty( $_FILES['sic_import_file']['tmp_name'] ) ) {
-			wp_safe_redirect( add_query_arg( 'sic_import', 'error', $redirect_url ) );
+		if ( empty( $_FILES['smidx_import_file']['tmp_name'] ) ) {
+			wp_safe_redirect( add_query_arg( 'smidx_import', 'error', $redirect_url ) );
 			exit;
 		}
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents
-		$tmp_name = isset( $_FILES['sic_import_file']['tmp_name'] ) ? sanitize_text_field( wp_unslash( $_FILES['sic_import_file']['tmp_name'] ) ) : '';
+		$tmp_name = isset( $_FILES['smidx_import_file']['tmp_name'] ) ? sanitize_text_field( wp_unslash( $_FILES['smidx_import_file']['tmp_name'] ) ) : '';
 		$contents = $tmp_name ? file_get_contents( $tmp_name ) : false;
 		$decoded  = json_decode( (string) $contents, true );
 
 		if ( ! is_array( $decoded ) ) {
-			wp_safe_redirect( add_query_arg( 'sic_import', 'error', $redirect_url ) );
+			wp_safe_redirect( add_query_arg( 'smidx_import', 'error', $redirect_url ) );
 			exit;
 		}
 
@@ -334,7 +334,7 @@ private function get_tab_script() {
 		$clean = $this->sanitize_settings( $decoded );
 		update_option( self::OPTION_KEY, $clean );
 
-		wp_safe_redirect( add_query_arg( 'sic_import', 'success', $redirect_url ) );
+		wp_safe_redirect( add_query_arg( 'smidx_import', 'success', $redirect_url ) );
 		exit;
 	}
 
@@ -347,26 +347,26 @@ private function get_tab_script() {
 	 */
 	private function render_card( $key, $field, $settings ) {
 		$checked    = ! empty( $settings[ $key ] );
-		$card_class = $checked ? 'sic-card is-on' : 'sic-card';
+		$card_class = $checked ? 'smidx-card is-on' : 'smidx-card';
 		?>
 		<div class="<?php echo esc_attr( $card_class ); ?>">
-			<div class="sic-card-body">
-				<div class="sic-card-icon">
+			<div class="smidx-card-body">
+				<div class="smidx-card-icon">
 					<span class="dashicons <?php echo esc_attr( $field['icon'] ); ?>"></span>
 				</div>
-				<div class="sic-card-text">
+				<div class="smidx-card-text">
 					<strong><?php echo esc_html( $field['label'] ); ?></strong>
 					<span><?php echo esc_html( $field['description'] ); ?></span>
 				</div>
 			</div>
-			<label class="sic-switch">
+			<label class="smidx-switch">
 				<input
 					type="checkbox"
 					name="<?php echo esc_attr( self::OPTION_KEY ); ?>[<?php echo esc_attr( $key ); ?>]"
 					value="1"
 					<?php checked( $checked ); ?>
 				/>
-				<span class="sic-switch-slider"></span>
+				<span class="smidx-switch-slider"></span>
 			</label>
 		</div>
 		<?php
@@ -419,17 +419,17 @@ private function render_hidden_fields_for_other_tabs( $current_tab, $settings ) 
 	 */
 	private function render_advanced_settings_field( $settings ) {
 		?>
-		<div class="sic-card sic-card-text-input">
-			<div class="sic-card-body">
-				<div class="sic-card-icon">
+		<div class="smidx-card smidx-card-text-input">
+			<div class="smidx-card-body">
+				<div class="smidx-card-icon">
 					<span class="dashicons dashicons-admin-links"></span>
 				</div>
-				<div class="sic-card-text">
+				<div class="smidx-card-text">
 					<strong><?php esc_html_e( 'Attachment redirect fallback URL', 'smart-index-control' ); ?></strong>
 					<span><?php esc_html_e( 'Where to send visitors when an attachment has no parent post. Leave blank to use your homepage.', 'smart-index-control' ); ?></span>
 					<input
 						type="url"
-						class="sic-text-input"
+						class="smidx-text-input"
 						name="<?php echo esc_attr( self::OPTION_KEY ); ?>[redirect_fallback_url]"
 						value="<?php echo esc_attr( isset( $settings['redirect_fallback_url'] ) ? $settings['redirect_fallback_url'] : '' ); ?>"
 						placeholder="<?php echo esc_attr( home_url( '/' ) ); ?>"
@@ -438,7 +438,7 @@ private function render_hidden_fields_for_other_tabs( $current_tab, $settings ) 
 			</div>
 		</div>
 
-		<div class="sic-footer-actions">
+		<div class="smidx-footer-actions">
 			<?php submit_button( __( 'Save settings', 'smart-index-control' ) ); ?>
 		</div>
 		<?php
@@ -452,16 +452,16 @@ private function render_hidden_fields_for_other_tabs( $current_tab, $settings ) 
 	 */
 	private function render_advanced_io_section() {
 		?>
-		<div class="sic-advanced-section">
+		<div class="smidx-advanced-section">
 			<h3><?php esc_html_e( 'Export & import settings', 'smart-index-control' ); ?></h3>
-			<p class="sic-panel-intro">
+			<p class="smidx-panel-intro">
 				<?php esc_html_e( 'Useful when setting up the same configuration on multiple sites.', 'smart-index-control' ); ?>
 			</p>
 
-			<div class="sic-io-row">
+			<div class="smidx-io-row">
 				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-					<input type="hidden" name="action" value="sic_export_settings" />
-					<?php wp_nonce_field( 'sic_export_settings' ); ?>
+					<input type="hidden" name="action" value="smidx_export_settings" />
+					<?php wp_nonce_field( 'smidx_export_settings' ); ?>
 					<button type="submit" class="button">
 						<span class="dashicons dashicons-download"></span>
 						<?php esc_html_e( 'Export settings (.json)', 'smart-index-control' ); ?>
@@ -469,9 +469,9 @@ private function render_hidden_fields_for_other_tabs( $current_tab, $settings ) 
 				</form>
 
 				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" enctype="multipart/form-data">
-					<input type="hidden" name="action" value="sic_import_settings" />
-					<?php wp_nonce_field( 'sic_import_settings' ); ?>
-					<input type="file" name="sic_import_file" accept="application/json" required />
+					<input type="hidden" name="action" value="smidx_import_settings" />
+					<?php wp_nonce_field( 'smidx_import_settings' ); ?>
+					<input type="file" name="smidx_import_file" accept="application/json" required />
 					<button type="submit" class="button">
 						<span class="dashicons dashicons-upload"></span>
 						<?php esc_html_e( 'Import settings', 'smart-index-control' ); ?>
@@ -481,14 +481,14 @@ private function render_hidden_fields_for_other_tabs( $current_tab, $settings ) 
 
 			<?php
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display flag from redirect, no state change.
-			$import_status = isset( $_GET['sic_import'] ) ? sanitize_key( wp_unslash( $_GET['sic_import'] ) ) : '';
+			$import_status = isset( $_GET['smidx_import'] ) ? sanitize_key( wp_unslash( $_GET['smidx_import'] ) ) : '';
 			?>
 
 			<?php if ( $import_status ) : ?>
 				<?php if ( 'success' === $import_status ) : ?>
-					<p class="sic-io-notice is-success"><?php esc_html_e( 'Settings imported successfully.', 'smart-index-control' ); ?></p>
+					<p class="smidx-io-notice is-success"><?php esc_html_e( 'Settings imported successfully.', 'smart-index-control' ); ?></p>
 				<?php else : ?>
-					<p class="sic-io-notice is-error"><?php esc_html_e( 'Import failed. Please upload a valid settings JSON file exported from this plugin.', 'smart-index-control' ); ?></p>
+					<p class="smidx-io-notice is-error"><?php esc_html_e( 'Import failed. Please upload a valid settings JSON file exported from this plugin.', 'smart-index-control' ); ?></p>
 				<?php endif; ?>
 			<?php endif; ?>
 		</div>
@@ -522,19 +522,19 @@ private function render_hidden_fields_for_other_tabs( $current_tab, $settings ) 
 			}
 		}
 		?>
-		<div class="wrap sic-wrap">
+		<div class="wrap smidx-wrap">
 
-			<div class="sic-header">
-				<div class="sic-header-left">
-					<div class="sic-logo">
+			<div class="smidx-header">
+				<div class="smidx-header-left">
+					<div class="smidx-logo">
 						<span class="dashicons dashicons-shield"></span>
 					</div>
 					<div>
 						<h1><?php esc_html_e( 'Smart Index Control', 'smart-index-control' ); ?></h1>
-						<p class="sic-header-sub"><?php esc_html_e( 'Indexing, feeds, and attachment cleanup for SEO', 'smart-index-control' ); ?></p>
+						<p class="smidx-header-sub"><?php esc_html_e( 'Indexing, feeds, and attachment cleanup for SEO', 'smart-index-control' ); ?></p>
 					</div>
 				</div>
-				<span class="sic-status-pill">
+				<span class="smidx-status-pill">
 					<span class="dashicons dashicons-yes-alt"></span>
 					<?php
 					printf(
@@ -547,7 +547,7 @@ private function render_hidden_fields_for_other_tabs( $current_tab, $settings ) 
 				</span>
 			</div>
 
-			<nav class="sic-tabs">
+			<nav class="smidx-tabs">
 				<?php foreach ( $tabs as $tab_key => $tab_data ) : ?>
 					<a
 						href="<?php echo esc_url( add_query_arg( array( 'page' => self::PAGE_SLUG, 'tab' => $tab_key ), admin_url( 'admin.php' ) ) ); ?>"
@@ -560,54 +560,54 @@ private function render_hidden_fields_for_other_tabs( $current_tab, $settings ) 
 				<?php endforeach; ?>
 			</nav>
 
-			<div class="sic-panel">
-				<div class="sic-tab-panel<?php echo 'archives' === $active_tab ? ' is-active' : ''; ?>" data-tab="archives">
+			<div class="smidx-panel">
+				<div class="smidx-tab-panel<?php echo 'archives' === $active_tab ? ' is-active' : ''; ?>" data-tab="archives">
 					<form action="options.php" method="post">
-						<?php settings_fields( 'sic_settings_group' ); ?>
+						<?php settings_fields( 'smidx_settings_group' ); ?>
 						<?php $this->render_hidden_fields_for_other_tabs( 'archives', $settings ); ?>
-						<p class="sic-panel-intro">
+						<p class="smidx-panel-intro">
 							<?php esc_html_e( 'Enable only what you need. Nothing here is turned on by default.', 'smart-index-control' ); ?>
 						</p>
 						<?php foreach ( $fields as $key => $field ) : if ( 'archives' === $field['tab'] ) : $this->render_card( $key, $field, $settings ); endif; endforeach; ?>
-						<div class="sic-footer-actions"><?php submit_button( __( 'Save settings', 'smart-index-control' ) ); ?></div>
+						<div class="smidx-footer-actions"><?php submit_button( __( 'Save settings', 'smart-index-control' ) ); ?></div>
 					</form>
 				</div>
 
-				<div class="sic-tab-panel<?php echo 'feeds' === $active_tab ? ' is-active' : ''; ?>" data-tab="feeds">
+				<div class="smidx-tab-panel<?php echo 'feeds' === $active_tab ? ' is-active' : ''; ?>" data-tab="feeds">
 					<form action="options.php" method="post">
-						<?php settings_fields( 'sic_settings_group' ); ?>
+						<?php settings_fields( 'smidx_settings_group' ); ?>
 						<?php $this->render_hidden_fields_for_other_tabs( 'feeds', $settings ); ?>
-						<p class="sic-panel-intro">
+						<p class="smidx-panel-intro">
 							<?php esc_html_e( 'Enable only what you need. Nothing here is turned on by default.', 'smart-index-control' ); ?>
 						</p>
 						<?php foreach ( $fields as $key => $field ) : if ( 'feeds' === $field['tab'] ) : $this->render_card( $key, $field, $settings ); endif; endforeach; ?>
-						<div class="sic-footer-actions"><?php submit_button( __( 'Save settings', 'smart-index-control' ) ); ?></div>
+						<div class="smidx-footer-actions"><?php submit_button( __( 'Save settings', 'smart-index-control' ) ); ?></div>
 					</form>
 				</div>
 
-				<div class="sic-tab-panel<?php echo 'attachments' === $active_tab ? ' is-active' : ''; ?>" data-tab="attachments">
+				<div class="smidx-tab-panel<?php echo 'attachments' === $active_tab ? ' is-active' : ''; ?>" data-tab="attachments">
 					<form action="options.php" method="post">
-						<?php settings_fields( 'sic_settings_group' ); ?>
+						<?php settings_fields( 'smidx_settings_group' ); ?>
 						<?php $this->render_hidden_fields_for_other_tabs( 'attachments', $settings ); ?>
-						<p class="sic-panel-intro">
+						<p class="smidx-panel-intro">
 							<?php esc_html_e( 'Enable only what you need. Nothing here is turned on by default.', 'smart-index-control' ); ?>
 						</p>
 						<?php foreach ( $fields as $key => $field ) : if ( 'attachments' === $field['tab'] ) : $this->render_card( $key, $field, $settings ); endif; endforeach; ?>
-						<div class="sic-footer-actions"><?php submit_button( __( 'Save settings', 'smart-index-control' ) ); ?></div>
+						<div class="smidx-footer-actions"><?php submit_button( __( 'Save settings', 'smart-index-control' ) ); ?></div>
 					</form>
 				</div>
 
-				<div class="sic-tab-panel<?php echo 'advanced' === $active_tab ? ' is-active' : ''; ?>" data-tab="advanced">
+				<div class="smidx-tab-panel<?php echo 'advanced' === $active_tab ? ' is-active' : ''; ?>" data-tab="advanced">
 					<form action="options.php" method="post">
-						<?php settings_fields( 'sic_settings_group' ); ?>
+						<?php settings_fields( 'smidx_settings_group' ); ?>
 						<?php $this->render_hidden_fields_for_other_tabs( 'advanced', $settings ); ?>
 						<?php $this->render_advanced_settings_field( $settings ); ?>
 					</form>
 					<?php $this->render_advanced_io_section(); ?>
 				</div>
 
-				<div class="sic-tab-panel<?php echo 'about' === $active_tab ? ' is-active' : ''; ?>" data-tab="about">
-					<div class="sic-about-card">
+				<div class="smidx-tab-panel<?php echo 'about' === $active_tab ? ' is-active' : ''; ?>" data-tab="about">
+					<div class="smidx-about-card">
 						<p><?php esc_html_e( 'Smart Index Control is a focused SEO cleanup plugin: it controls indexing for tag/category archives, disables XML feeds, and redirects attachment pages — without touching your theme or .htaccess.', 'smart-index-control' ); ?></p>
 						<p>
 							<?php
@@ -618,8 +618,8 @@ private function render_hidden_fields_for_other_tabs( $current_tab, $settings ) 
 							);
 							?>
 						</p>
-						<div class="sic-about-meta">
-							<div><span><?php esc_html_e( 'Version', 'smart-index-control' ); ?></span><strong><?php echo esc_html( SIC_VERSION ); ?></strong></div>
+						<div class="smidx-about-meta">
+							<div><span><?php esc_html_e( 'Version', 'smart-index-control' ); ?></span><strong><?php echo esc_html( SMIDX_VERSION ); ?></strong></div>
 							<div><span><?php esc_html_e( 'Requires', 'smart-index-control' ); ?></span><strong>WordPress 6.0+, PHP 7.4+</strong></div>
 						</div>
 					</div>
